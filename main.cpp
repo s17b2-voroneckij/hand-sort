@@ -8,7 +8,6 @@ struct Node {
     int value;
 };
 
-
 void free(int size, Node * our)
 {
     for (int i = 0; i < size; i++)
