@@ -2,15 +2,18 @@
 #include <utility>
 
 using std::cin;
+
 using std::cout;
 using std::pair;
 
+template<typename T>
 struct Node {
     Node * right = nullptr;
-    int value;
+    T value;
 };
 
-void free(size_t size, Node * our)
+template<typename T>
+void free(size_t size, Node<T> * our)
 {
     for (int i = 0; i < size; i++)
     {
@@ -20,17 +23,23 @@ void free(size_t size, Node * our)
     }
 }
 
-pair<Node*, Node*> split(size_t size, Node * our)
+template<typename T>
+pair<Node<T>*, Node<T>*> split(size_t size, Node<T> * our)
 {
-    Node* res = our;
+    Node<T>* res = our;
     for (size_t i = 0; i < size / 2; i++)
         res = res->right;
     return {our, res};
 }
 
-Node* merge(Node* f, size_t s1, Node* s, size_t s2)
+template<typename T>
+Node<T>* merge(Node<T>* f, size_t s1, Node<T>* s, size_t s2)
 {
-    Node* res = f;
+    if (s1 == 0)
+        return s;
+    if (s2 == 0)
+        return f;
+    Node<T>* res = f;
     if (f->value > s->value)
     {
         res = s;
@@ -77,7 +86,8 @@ Node* merge(Node* f, size_t s1, Node* s, size_t s2)
     return mem;
 }
 
-Node* merge_sort(size_t size, Node * our)
+template<typename T>
+Node<T>* merge_sort(size_t size, Node<T> * our)
 {
     if (size <= 1)
         return our;
@@ -91,12 +101,12 @@ int main()
 {
     size_t n = 0;
     cin >> n;
-    Node * our = new Node;
-    Node * next = our;
+    Node<int> * our = new Node<int>;
+    Node<int> * next = our;
     cin >> our->value;
     for (size_t i = 0; i < n - 1; i++)
     {
-        next->right = new Node;
+        next->right = new Node<int>;
         next = next->right;
         cin >> next->value;
     }
