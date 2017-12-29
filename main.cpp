@@ -1,15 +1,18 @@
 #include <iostream>
+#include <utility>
 
 using std::cin;
 using std::cout;
+using std::pair;
 
+template<typename T>
 struct Node {
     Node * right = nullptr;
-    int value;
+    T value;
 };
 
-
-void free(int size, Node * our)
+template<typename T>
+void free(size_t size, Node<T> * our)
 {
     for (int i = 0; i < size; i++)
     {
@@ -19,63 +22,96 @@ void free(int size, Node * our)
     }
 }
 
-Node* merge_sort(int size, Node * our)
+template<typename T>
+pair<Node<T>*, Node<T>*> split(size_t size, Node<T> * our)
 {
-    if (size <= 1)
-        return our;
-    Node * second = our;
-    for (int i = 0; i < size / 2; i++)
+    Node<T>* res = our;
+    for (size_t i = 0; i < size / 2; i++)
+        res = res->right;
+    return {our, res};
+}
+
+template<typename T>
+Node<T>* merge(Node<T>* f, size_t s1, Node<T>* s, size_t s2)
+{
+    if (s1 == 0)
+        return s;
+    if (s2 == 0)
+        return f;
+    Node<T>* res = f;
+    if (f->value > s->value)
     {
-        second = second->right;
+        res = s;
+        s = s->right;
+        s2--;
     }
-    auto s1 = size / 2;
-    auto s2 = size - s1;
-    our = merge_sort(s1, our);
-    second = merge_sort(s2, second);
-    auto rem1 = our, rem2 = second;
-    Node * write = new Node;
-    auto res = write;
-    while (s1 > 0 || s2 > 0)
+    else
     {
-        if (s2 == 0 || (s1 != 0 && our->value < second->value))
+        s1--;
+        f = f->right;
+    }
+    auto mem = res;
+    while (s1 > 0 && s2 > 0)
+    {
+        if (f->value < s->value)
         {
-            write->value = our->value;
-            our = our->right;
+            res->right = f;
+            res = res->right;
+            f = f->right;
             s1--;
-            write->right = new Node;
-            write = write->right;
         }
         else
         {
-            write->value = second->value;
-            second = second->right;
+            res->right = s;
+            res = res->right;
+            s = s->right;
             s2--;
-            write->right = new Node;
-            write = write->right;
         }
     }
-    free(size / 2, rem1);
-    free(size - size / 2, rem2);
-    free(1, write);
-    return res;
+    while (s1 > 0)
+    {
+        res->right = f;
+        res = res->right;
+        f = f->right;
+        s1--;
+    }
+    while (s2 > 0)
+    {
+        res->right = s;
+        res = res->right;
+        s = s->right;
+        s2--;
+    }
+    return mem;
+}
+
+template<typename T>
+Node<T>* merge_sort(size_t size, Node<T> * our)
+{
+    if (size <= 1)
+        return our;
+    auto p = split(size, our);
+    p.first = merge_sort(size / 2, p.first);
+    p.second = merge_sort(size - size / 2, p.second);
+    return merge(p.first, size / 2, p.second, size - size / 2);
 }
 
 int main()
 {
-    int n;
+    size_t n = 0;
     cin >> n;
-    Node * our = new Node;
-    Node * next = our;
+    Node<int> * our = new Node<int>;
+    Node<int> * next = our;
     cin >> our->value;
-    for (int i = 0; i < n - 1; i++)
+    for (size_t i = 0; i < n - 1; i++)
     {
-        next->right = new Node;
+        next->right = new Node<int>;
         next = next->right;
         cin >> next->value;
     }
     our = merge_sort(n, our);
     auto rem = our;
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
         cout << our->value << " ", our = our->right;
     free(n, rem);
 }
