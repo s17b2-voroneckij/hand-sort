@@ -17,28 +17,29 @@ size_t default_allocate = 5000;
 
 template<class KeyType, class ValueType, class Hash = hash<KeyType>> class HashMap
 {
-public:
+private:
     list<pair<const KeyType, ValueType>> memory;
-    size_t _size = 0;
+    size_t map_size = 0;
     size_t allocated;
     vector<decltype(memory.begin())> pointers;
     Hash hasher;
 
-    explicit HashMap(const Hash & oth, size_t sz = default_allocate) : _size(0), allocated(sz), hasher(oth){
+public:
+    explicit HashMap(const Hash & oth, size_t sz = default_allocate) : map_size(0), allocated(sz), hasher(oth){
         pointers.resize(sz);
     }
 
     explicit HashMap(size_t sz = default_allocate) {
         pointers.resize(sz);
         allocated = sz;
-        _size = 0;
+        map_size = 0;
     }
 
     void clear(size_t sz = default_allocate) {
         memory.clear();
         pointers.clear();
         pointers.resize(sz);
-        _size = 0;
+        map_size = 0;
         allocated = sz;
     }
 
@@ -46,7 +47,7 @@ public:
         size_t pos = hasher(key) % allocated;
         if (pointers[pos] == decltype(memory.begin())()) {
             pointers[pos] = memory.insert(memory.end(), {key, ValueType()});
-            _size++;
+            map_size++;
             return (pointers[pos]->second);
         }
         else {
@@ -56,7 +57,7 @@ public:
             if (t != memory.end() && t->first == key)
                 return t->second;
             else {
-                _size++;
+                map_size++;
                 return memory.insert(t, {key, ValueType()})->second;
             }
         }
@@ -150,21 +151,21 @@ public:
                     pointers[hasher(key) % allocated] = iterator();
                 else
                     pointers[hasher(key) % allocated] = next;
-                --_size;
+                --map_size;
                 memory.erase(t);
                 return ;
             }
             memory.erase(t);
-            _size--;
+            map_size--;
         }
     }
 
     size_t size() const {
-        return _size;
+        return map_size;
     }
 
     bool empty() const {
-        return _size == 0;
+        return map_size == 0;
     }
 
     void insert(const pair<KeyType, ValueType> & a) {
@@ -176,7 +177,7 @@ public:
     HashMap(T first, T last, const Hash & oth = Hash(), size_t sz = default_allocate) {
         pointers.resize(sz);
         allocated = sz;
-        _size = 0;
+        map_size = 0;
         hasher = oth;
         while (first != last) {
             insert(*first);
@@ -188,7 +189,7 @@ public:
         auto first = a.begin(), last = a.end();
         pointers.resize(sz);
         allocated = sz;
-        _size = 0;
+        map_size = 0;
         hasher = oth;
         while (first != last) {
             insert(*first);
@@ -196,7 +197,7 @@ public:
         }
     }
 
-    HashMap(const HashMap && a) : memory(a.memory), _size(a._size), allocated(a.allocated), pointers(a.pointers), hasher(a.hasher){}
+    HashMap(const HashMap && a) : memory(a.memory), map_size(a.map_size), allocated(a.allocated), pointers(a.pointers), hasher(a.hasher){}
 
     HashMap& operator = (const HashMap & a) {
         if (this == &a)
@@ -210,7 +211,8 @@ public:
     HashMap(const HashMap & a) {
         pointers.resize(default_allocate);
         allocated = default_allocate;
-        _size = 0;
+        map_size = 0;
         *this = a;
     }
 };
+
