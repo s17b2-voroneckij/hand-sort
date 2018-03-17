@@ -18,7 +18,8 @@ size_t default_allocate = 5000;
 template<class KeyType, class ValueType, class Hash = hash<KeyType>> class HashMap
 {
 private:
-    list<pair<const KeyType, ValueType>> memory;
+    using pair_type = pair<const KeyType, ValueType>;
+    list<pair_type> memory;
     size_t map_size = 0;
     size_t allocated;
     vector<decltype(memory.begin())> pointers;
@@ -43,7 +44,7 @@ public:
         allocated = sz;
     }
 
-    ValueType& operator [] (KeyType key) {
+    ValueType& operator [] (const KeyType& key) {
         size_t pos = hasher(key) % allocated;
         if (pointers[pos] == decltype(memory.begin())()) {
             pointers[pos] = memory.insert(memory.end(), {key, ValueType()});
@@ -63,7 +64,7 @@ public:
         }
     }
 
-    const ValueType& at(KeyType key) const {
+    const ValueType& at(const KeyType& key) const {
         size_t pos = hasher(key) % allocated;
         if (pointers[pos] == decltype(memory.begin())()) {
             throw std::out_of_range("");
@@ -100,7 +101,7 @@ public:
         return memory.end();
     }
 
-    const_iterator find(KeyType key) const {
+    const_iterator find(const KeyType& key) const {
         size_t pos = hasher(key) % allocated;
         if (pointers[pos] == decltype(memory.begin())()) {
             return end();
@@ -117,7 +118,7 @@ public:
         }
     }
 
-    iterator find(KeyType key) {
+    iterator find(const KeyType& key) {
         size_t pos = hasher(key) % allocated;
         if (pointers[pos] == decltype(memory.begin())()) {
             return end();
@@ -138,7 +139,7 @@ public:
         return hasher;
     }
 
-    void erase(KeyType key) {
+    void erase(const KeyType& key) {
         auto t = find(key);
         if (t != end()) {
             auto prev = t;
