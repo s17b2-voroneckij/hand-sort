@@ -21,7 +21,7 @@ class flow {
     vector<vector<int>> graph;
     vector<int> potential;
     vector<int> dist;
-    vector<int> Prev;
+    vector<int> prev;
     size_t n;
     long long cost = 0;
 
@@ -32,9 +32,9 @@ class flow {
             for (size_t j = 0; j < edges.size(); j++) {
                 auto e = edges[j];
                 if (potential[e.v] < 1e9 && potential[e.u] > potential[e.v] + e.t)
-                    potential[e.u] = potential[e.v] + e.t, Prev[e.u] = j;
+                    potential[e.u] = potential[e.v] + e.t, prev[e.u] = j;
                 if (potential[e.u] < 1e9 && potential[e.v] > potential[e.u] + e.t)
-                    potential[e.v] = potential[e.u] + e.t, Prev[e.v] = j;
+                    potential[e.v] = potential[e.u] + e.t, prev[e.v] = j;
             }
         }
     }
@@ -61,7 +61,7 @@ class flow {
                 if (dist[oth] > dist[curr] + w) {
                     heap.erase({dist[oth], oth});
                     dist[oth] = dist[curr] + w;
-                    Prev[oth] = num;
+                    prev[oth] = num;
                     heap.insert({dist[oth], oth});
                 }
             }
@@ -76,7 +76,7 @@ public:
         n = a;
         graph.resize(n + 1);
         dist.resize(n + 1);
-        Prev.resize(n + 1);
+        prev.resize(n + 1);
         potential.resize(n + 1);
     }
 
@@ -95,7 +95,7 @@ public:
 
             int curr = n;
             while (curr != 1) {
-                int road = Prev[curr];
+                int road = prev[curr];
                 if (abs(edges[road].flow) == 1)
                     edges[road].flow = 0;
                 else if (edges[road].u == curr)
@@ -153,13 +153,7 @@ auto read_graph() {
     return make_pair(k, graph);
 }
 
-void solve(int k, flow graph) {
-    if (!graph.add_flows(k)) {
-        cout << -1;
-        return ;
-    }
-
-
+void print_result(int k, flow& graph) {
     cout.precision(20);
     cout << (double)graph.get_cost() / k << endl;
     for (const auto& way : graph.get_ways(k)) {
@@ -168,6 +162,16 @@ void solve(int k, flow graph) {
             cout << v + 1 << " ";
         cout << "\n";
     }
+}
+
+void solve(int k, flow& graph) {
+    if (!graph.add_flows(k)) {
+        cout << -1;
+        return ;
+    }
+
+
+    print_result(k, graph);
 }
 
 int main() {
