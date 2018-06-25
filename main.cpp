@@ -169,8 +169,6 @@ void solve(int k, flow& graph) {
         cout << -1;
         return ;
     }
-
-
     print_result(k, graph);
 }
 
